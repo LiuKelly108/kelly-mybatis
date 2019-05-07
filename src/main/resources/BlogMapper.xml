@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--########MyBatis的namespace配置########################-->
+<mapper namespace="com.kellystudy.mapper.BlogMapper">
+
+    <!--#####################二级缓存的配置#################-->
+    <!-- 声明这个namespace使用二级缓存 -->
+   <!-- <cache/>-->
+
+    <!-- 使用Redis作为二级缓存 -->
+<!--
+    <cache type="org.mybatis.caches.redis.RedisCache"
+           eviction="FIFO" flushInterval="60000" size="512" readOnly="true"/>
+-->
+
+    <cache type="org.apache.ibatis.cache.impl.PerpetualCache"
+           size="1024"
+           eviction="LRU"
+           flushInterval="120000"
+           readOnly="false"/>
+
+
+    <!---##################以下开始为SQL的相关配置#################################-->
+    <resultMap id="BaseResultMap" type="blog">
+        <id column="bid" property="bid" jdbcType="INTEGER"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="author_id" property="authorId" jdbcType="INTEGER"/>
+    </resultMap>
+
+
+    <select id="selectBlogById" resultMap="BaseResultMap" statementType="PREPARED" useCache="true">
+        select * from blog where bid = #{bid}
+    </select>
+
+    <select id="selectBlogList" resultMap="BaseResultMap" >
+        select bid, name, author_id authorId from blog
+    </select>
+
+
+    <update id="updateBlogByPrimaryKey" parameterType="blog" >
+        update blog
+        set name = #{name,jdbcType=VARCHAR}
+        where bid = #{bid,jdbcType=INTEGER}
+    </update>
+
+    <insert id="insertBlog" parameterType="blog">
+        insert into blog (bid, name, author_id)
+        values (#{bid,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{authorId,jdbcType=INTEGER})
+    </insert>
+    <!--
+    values (#{bid,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR,typeHandler=com.gupaoedu.type.MyTypeHandler}, #{authorId,jdbcType=CHAR})
+    -->
+
+
+   <!-- &lt;!&ndash; $只能用在自定义类型和map上 &ndash;&gt;
+    <select id="selectBlogByBean"  parameterType="blog" resultType="blog" >
+        select bid, name, author_id authorId from blog where name = '${name}'
+    </select>
+-->
+
+
+
+    <!-- 手动实现翻页 -->
+<!--    <select id="selectBlogPage" parameterType="map" resultMap="BaseResultMap">
+        select * from blog limit #{curIndex} , #{pageSize}
+    </select>-->
+
+
+</mapper>
